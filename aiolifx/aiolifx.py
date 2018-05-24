@@ -284,17 +284,28 @@ class Device(aio.DatagramProtocol):
         if max_attempts is None:
             max_attempts = self.retry_count
 
+        import logging
+        _LOGGER = logging.getLogger(__name__)
+
+        _LOGGER.warning("try_sending")
+
         attempts = 0
         while attempts < max_attempts:
+            _LOGGER.warning("loop start")
             if msg.seq_num not in self.message: return
             event = aio.Event()
             self.message[msg.seq_num][1]= event
             attempts += 1
+            _LOGGER.warning("sendto")
             self.transport.sendto(msg.packed_message)
+            _LOGGER.warning("sendto done")
             try:
+                _LOGGER.warning("wait_for")
                 myresult = await aio.wait_for(event.wait(),timeout_secs)
+                _LOGGER.warning("wait_for done")
                 break
             except Exception as inst:
+                _LOGGER.warning("exception %s", inst)
                 if attempts >= max_attempts:
                     if msg.seq_num in self.message:
                         callb = self.message[msg.seq_num][2]
