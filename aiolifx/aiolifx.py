@@ -105,7 +105,6 @@ class Device(aio.DatagramProtocol):
         self.timeout = DEFAULT_TIMEOUT
         self.unregister_timeout = DEFAULT_TIMEOUT
         self.transport = None
-        self.task = None
         self.seq = 0
         # Key is the message sequence, value is (Response, Event, callb )
         self.message = {}
@@ -226,9 +225,6 @@ class Device(aio.DatagramProtocol):
         if self.transport:
             self.transport.close()
             self.transport = None
-        if self.task:
-            self.task.cancel()
-            self.task = None
 
     #
     #                            Workflow Methods
@@ -1243,10 +1239,8 @@ class LifxDiscovery(aio.DatagramProtocol):
             self.lights[mac_addr] = light
 
         _LOGGER.warning("coro")
-        coro = self.loop.create_datagram_endpoint(
+        await self.loop.create_datagram_endpoint(
             lambda: light, family=family, remote_addr=(remote_ip, remote_port))
-
-        light.task = self.loop.create_task(coro)
 
     def discover(self):
         """Method to send a discovery message
