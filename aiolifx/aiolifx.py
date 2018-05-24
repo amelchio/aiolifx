@@ -149,6 +149,16 @@ class Device(aio.DatagramProtocol):
         _LOGGER.warning("connection_lost")
         _LOGGER.warning("%s", exc)
 
+    def pause_writing(self):
+        import logging
+        _LOGGER = logging.getLogger(__name__)
+        _LOGGER.warning("pause_writing")
+
+    def resume_writing(self):
+        import logging
+        _LOGGER = logging.getLogger(__name__)
+        _LOGGER.warning("resume_writing")
+
     def datagram_received(self, data, addr):
         """Method run when data is received from the device
 
