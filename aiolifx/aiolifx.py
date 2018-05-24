@@ -1213,14 +1213,16 @@ class LifxDiscovery(aio.DatagramProtocol):
         response = unpack_lifx_message(data)
         response.ip_addr = addr[0]
 
+        import logging
+        _LOGGER = logging.getLogger(__name__)
+
         mac_addr = response.target_addr
         if mac_addr == BROADCAST_MAC:
             return
         if mac_addr != 'd0:73:d5:32:89:97':
+            _LOGGER.error("Skipping %s", mac_addr)
             return
 
-        import logging
-        _LOGGER = logging.getLogger(__name__)
         _LOGGER.warning("discovered")
 
         if type(response) == StateService and response.service == 1: # only look for UDP services
