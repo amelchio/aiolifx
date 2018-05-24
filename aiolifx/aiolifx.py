@@ -163,6 +163,11 @@ class Device(aio.DatagramProtocol):
             :param addr: sender IP address 2-tuple for IPv4, 4-tuple for IPv6
             :type addr: tuple
         """
+        import logging
+        _LOGGER = logging.getLogger(__name__)
+
+        _LOGGER.warning("datagram_received")
+
         self.register()
         response = unpack_lifx_message(data)
         self.lastmsg=datetime.datetime.now()
