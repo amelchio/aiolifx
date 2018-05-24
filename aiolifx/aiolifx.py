@@ -1229,10 +1229,8 @@ class LifxDiscovery(aio.DatagramProtocol):
             _LOGGER.warning("discovered known")
             light = self.lights[mac_addr]
 
-            # nothing changed, just register again
-            if light.ip_addr == remote_ip and light.port == remote_port:
-                _LOGGER.warning("re-register")
-                light.register()
+            # nothing to do
+            if light.registered:
                 return
 
             _LOGGER.warning("cleanup")
