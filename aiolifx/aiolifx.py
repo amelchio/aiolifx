@@ -156,21 +156,37 @@ class Device(aio.DatagramProtocol):
             :param addr: sender IP address 2-tuple for IPv4, 4-tuple for IPv6
             :type addr: tuple
         """
+        import logging
+        _LOGGER = logging.getLogger(__name__)
+
+        _LOGGER.warning("datagram_received")
         self.register()
+        _LOGGER.warning("registered")
         response = unpack_lifx_message(data)
+        _LOGGER.warning("%s", response)
         self.lastmsg=datetime.datetime.now()
         if response.seq_num in self.message:
+            _LOGGER.warning("seq_num found")
             response_type,myevent,callb = self.message[response.seq_num]
             if type(response) == response_type:
+                _LOGGER.warning("response_type match")
                 if response.source_id == self.source_id:
+                    _LOGGER.warning("source_id match")
                     if "State" in response.__class__.__name__:
                         setmethod="resp_set_"+response.__class__.__name__.replace("State","").lower()
+                        _LOGGER.warning("resp_set")
                         if setmethod in dir(self) and callable(getattr(self,setmethod)):
+                            _LOGGER.warning("getattr")
                             getattr(self,setmethod)(response)
+                            _LOGGER.warning("getattr done")
                     if callb:
+                        _LOGGER.warning("callb")
                         callb(self,response)
+                        _LOGGER.warning("callb done")
                     myevent.set()
+                    _LOGGER.warning("set event")
                 del(self.message[response.seq_num])
+                _LOGGER.warning("del done")
             elif type(response) == Acknowledgement:
                 pass
             else:
