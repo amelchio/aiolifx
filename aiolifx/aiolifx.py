@@ -37,6 +37,9 @@ DEFAULT_ATTEMPTS=3  # How many time shou;d we try to send to the bulb`
 DISCOVERY_INTERVAL=180
 DISCOVERY_STEP=5
 
+import logging
+_LOGGER = logging.getLogger(__name__)
+
 def mac_to_ipv6_linklocal(mac,prefix="fe80::"):
     """ Translate a MAC address into an IPv6 address in the prefixed network.
 
@@ -139,28 +142,19 @@ class Device(aio.DatagramProtocol):
     def connection_made(self, transport):
         """Method run when the connection to the lamp is established
         """
-        import logging
-        _LOGGER = logging.getLogger(__name__)
         _LOGGER.warning("connection_made")
 
         self.transport = transport
         self.register()
 
     def connection_lost(self, exc):
-        import logging
-        _LOGGER = logging.getLogger(__name__)
-
         _LOGGER.warning("connection_lost")
         _LOGGER.warning("%s", exc)
 
     def pause_writing(self):
-        import logging
-        _LOGGER = logging.getLogger(__name__)
         _LOGGER.warning("pause_writing")
 
     def resume_writing(self):
-        import logging
-        _LOGGER = logging.getLogger(__name__)
         _LOGGER.warning("resume_writing")
 
     def datagram_received(self, data, addr):
@@ -177,9 +171,6 @@ class Device(aio.DatagramProtocol):
             :param addr: sender IP address 2-tuple for IPv4, 4-tuple for IPv6
             :type addr: tuple
         """
-        import logging
-        _LOGGER = logging.getLogger(__name__)
-
         _LOGGER.warning("datagram_received")
 
         self.register()
@@ -206,16 +197,15 @@ class Device(aio.DatagramProtocol):
 
     def error_received(self, exc):
         """Method run when an OS error is received."""
-        import logging
-        _LOGGER = logging.getLogger(__name__)
-
         _LOGGER.warning("error_received")
         _LOGGER.warning("%s", exc)
 
     def register(self):
         """Proxy method to register the device with the parent.
         """
+        _LOGGER.warning("register")
         if not self.registered:
+            _LOGGER.warning("really register")
             self.registered = True
             if self.parent:
                 self.parent.register(self)
@@ -302,9 +292,6 @@ class Device(aio.DatagramProtocol):
             timeout_secs = self.timeout
         if max_attempts is None:
             max_attempts = self.retry_count
-
-        import logging
-        _LOGGER = logging.getLogger(__name__)
 
         _LOGGER.warning("try_sending")
 
@@ -1213,9 +1200,6 @@ class LifxDiscovery(aio.DatagramProtocol):
         response = unpack_lifx_message(data)
         response.ip_addr = addr[0]
 
-        import logging
-        _LOGGER = logging.getLogger(__name__)
-
         mac_addr = response.target_addr
         if mac_addr == BROADCAST_MAC:
             return
@@ -1242,13 +1226,16 @@ class LifxDiscovery(aio.DatagramProtocol):
 
         if mac_addr in self.lights:
             # rediscovered
+            _LOGGER.warning("discovered known")
             light = self.lights[mac_addr]
 
             # nothing changed, just register again
             if light.ip_addr == remote_ip and light.port == remote_port:
+                _LOGGER.warning("re-register")
                 light.register()
                 return
 
+            _LOGGER.warning("cleanup")
             light.cleanup()
             light.ip_addr = remote_ip
             light.port = remote_port
@@ -1257,6 +1244,7 @@ class LifxDiscovery(aio.DatagramProtocol):
             light = Light(self.loop, mac_addr, remote_ip, remote_port, parent=self)
             self.lights[mac_addr] = light
 
+        _LOGGER.warning("coro")
         coro = self.loop.create_datagram_endpoint(
             lambda: light, family=family, remote_addr=(remote_ip, remote_port))
 
