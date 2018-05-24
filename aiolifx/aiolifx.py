@@ -139,6 +139,10 @@ class Device(aio.DatagramProtocol):
     def connection_made(self, transport):
         """Method run when the connection to the lamp is established
         """
+        import logging
+        _LOGGER = logging.getLogger(__name__)
+        _LOGGER.warning("connection_made")
+
         self.transport = transport
         self.register()
 
@@ -1212,6 +1216,12 @@ class LifxDiscovery(aio.DatagramProtocol):
         mac_addr = response.target_addr
         if mac_addr == BROADCAST_MAC:
             return
+        if mac_addr != 'd0:73:d5:32:89:97':
+            return
+
+        import logging
+        _LOGGER = logging.getLogger(__name__)
+        _LOGGER.warning("discovered")
 
         if type(response) == StateService and response.service == 1: # only look for UDP services
             # discovered
