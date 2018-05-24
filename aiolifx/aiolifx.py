@@ -1220,7 +1220,6 @@ class LifxDiscovery(aio.DatagramProtocol):
         if mac_addr == BROADCAST_MAC:
             return
         if mac_addr != 'd0:73:d5:32:89:97':
-            _LOGGER.error("Skipping %s", mac_addr)
             return
 
         _LOGGER.warning("discovered")
