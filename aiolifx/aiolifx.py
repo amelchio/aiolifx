@@ -142,6 +142,13 @@ class Device(aio.DatagramProtocol):
         self.transport = transport
         self.register()
 
+    def connection_lost(self, exc):
+        import logging
+        _LOGGER = logging.getLogger(__name__)
+
+        _LOGGER.warning("connection_lost")
+        _LOGGER.warning("%s", exc)
+
     def datagram_received(self, data, addr):
         """Method run when data is received from the device
 
